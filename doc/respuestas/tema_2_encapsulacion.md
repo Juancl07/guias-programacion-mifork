@@ -236,27 +236,47 @@ Gracias a que los datos están "encapsulados" tras los métodos, se ha podido mo
 ## 16. Si un atributo va a tener un método "getter" y "setter" públicos, ¿no es mejor declararlo público? ¿Cuál es la convención más habitual sobre los atributos, que sean públicos o privados? ¿Tiene esto algo que ver con las "invariantes de clase"?
 
 ### Respuesta
+Declarar un atributo como público, incluso si se planea permitir su lectura y escritura, se considera una mala práctica de diseño. Al hacerlo, se pierde el control sobre cómo y cuándo cambia el valor. Aunque un "setter" parezca una simple asignación, este actúa como un "filtro" o guardián. Si el atributo es público, cualquier parte del código puede asignarle valores que carezcan de sentido para la lógica del programa, sin que la clase pueda intervenir o enterarse del cambio.
 
+La convención más habitual y estrictamente seguida en el desarrollo profesional es declarar todos los atributos como privados. Esta práctica asegura que el estado interno del objeto esté protegido y que el acceso se realice exclusivamente a través de la interfaz pública definida por el programador. De este modo, la estructura interna de los datos puede evolucionar (por ejemplo, cambiar un nombre por un código numérico) sin romper el código que utiliza la clase.
+
+Este concepto está íntimamente ligado a las invariantes de clase. El uso de métodos de acceso permite validar que los datos introducidos cumplen con las reglas del negocio antes de ser almacenados. Si un atributo fuera público, no habría forma de garantizar que las invariantes se mantengan, ya que el objeto no tendría oportunidad de rechazar valores incorrectos. Por tanto, la privacidad de los atributos es el mecanismo técnico que permite que las invariantes sean algo más que simples deseos del programador.
 
 ## 17. ¿Qué significa que una clase sea **inmutable**? ¿qué es un método modificador? ¿Un método modificador es siempre un "setter"? ¿Tiene ventajas que una clase sea inmutable?
 
 ### Respuesta
+Una clase se define como inmutable cuando su estado interno no puede ser modificado una vez que el objeto ha sido creado e inicializado por el constructor. En términos prácticos, esto implica que no existen métodos que permitan cambiar el valor de sus atributos y que estos suelen estar marcados con la palabra reservada final. Un objeto inmutable es como una constante compleja: una vez que nace con ciertos valores, los mantiene hasta que desaparece de la memoria.
 
+Un método modificador es aquel cuya ejecución altera el estado del objeto. Aunque los "setters" son los modificadores más comunes, no son los únicos. Por ejemplo, en una clase CuentaBancaria, un método retirarEfectivo(double cantidad) es un modificador porque cambia el saldo, pero no es un "setter" en el sentido tradicional. En una clase inmutable, cualquier operación que "modifique" el objeto debe, en realidad, devolver una nueva instancia con los cambios aplicados, dejando la original intacta.
+
+Las ventajas de la inmutabilidad son significativas, especialmente en sistemas complejos. Los objetos inmutiles son inherentemente seguros para hilos (thread-safe), ya que no hay riesgo de que un hilo cambie el valor mientras otro lo lee. Además, simplifican enormemente la depuración del código: si un objeto tiene un valor incorrecto, se sabe con certeza que el error ocurrió en el momento de su creación, y no en algún punto intermedio de la ejecución del programa.
 
 ## 18. ¿Es recomendable incluir métodos "setter" siempre y como convención?
 
 ### Respuesta
+No es recomendable incluir "setters" por defecto para todos los atributos. Existe una tendencia común a generar automáticamente métodos de acceso para cada variable de la clase, pero esto a menudo conduce a lo que se conoce como un "modelo de dominio anémico", donde los objetos son simples bolsas de datos sin verdadera lógica de negocio. Un exceso de setters debilita la encapsulación, ya que expone las "tripas" del objeto innecesariamente.
 
+El diseño de una clase debe guiarse por la necesidad y el comportamiento. Si un atributo no necesita cambiar a lo largo de la vida del objeto, no debe tener un setter. De hecho, muchos arquitectos de software abogan por favorecer la inmutabilidad y solo añadir métodos modificadores cuando la lógica de la aplicación lo exija estrictamente. Cuanto más pequeña sea la interfaz de modificación, más fácil será razonar sobre el comportamiento de la clase.
+
+En conclusión, la convención debe ser la privacidad absoluta y la exposición selectiva. Antes de añadir un setter, se debe reflexionar sobre si ese cambio de estado es realmente necesario desde fuera de la clase o si el cambio debería ser el resultado de un método con un nombre más semántico que realice una operación lógica completa.
 
 ## 19. ¿La clase `String` en Java es mutable o inmutable? ¿Qué ocurre al concatenar dos cadenas? ¿Qué debemos hacer si vamos a hacer una operación que implique concatenar muchas veces para construir paso a paso una cadena muy larga?
 
 ### Respuesta
+En Java, la clase String es estrictamente inmutable. Esto significa que una vez que se crea una cadena de texto, los caracteres que la forman no pueden ser alterados. Esta decisión de diseño permite a Java optimizar el uso de memoria mediante el "Pool de Strings", donde varias variables pueden apuntar a la misma dirección de memoria si contienen el mismo texto, con la seguridad de que nadie cambiará el contenido "bajo sus pies".
 
+Cuando se realiza la concatenación de dos cadenas (por ejemplo, con el operador +), no se modifica ninguna de las cadenas existentes. En su lugar, la Máquina Virtual de Java crea un tercer objeto String totalmente nuevo que contiene el resultado de la unión. Si se concatenan muchas cadenas en un bucle, el programa generará una gran cantidad de objetos intermedios efímeros que sobrecargarán al recolector de basura (Garbage Collector), degradando significativamente el rendimiento.
+
+Para construir cadenas largas de forma eficiente o realizar múltiples modificaciones, se debe utilizar la clase StringBuilder. A diferencia de String, StringBuilder es mutable y utiliza un array interno que puede crecer. Esto permite añadir o insertar texto sin crear nuevos objetos en cada paso. Una vez que se ha terminado de construir la cadena, se utiliza el método toString() para obtener el resultado final como un objeto inmutable.
 
 ## 20. En POO ¿Cómo se comparan objetos de una misma clase? ¿Por su contenido o por su identidad? ¿Qué es el método equals en Java? ¿Qué hace por defecto? ¿Cómo se deben comparar dos cadenas en Java? 
 
 ### Respuesta
+En la programación orientada a objetos, existen dos formas de entender la igualdad: la identidad y la equivalencia de contenido. El operador == compara identidades; es decir, verifica si dos variables apuntan exactamente a la misma dirección de memoria (el mismo objeto físico en el Heap). Por el contrario, la comparación por contenido busca determinar si dos objetos distintos representan el mismo valor lógico (por ejemplo, dos puntos diferentes con las mismas coordenadas).
 
+El método equals(Object obj) es la herramienta que proporciona Java para realizar comparaciones por contenido. Sin embargo, su comportamiento por defecto (heredado de la clase base Object) es realizar una comparación de identidad, comportándose exactamente igual que el operador ==. Para que una clase personalizada pueda compararse por contenido, el programador debe sobrescribir este método y definir qué atributos deben coincidir para considerar que dos objetos son "iguales".
+
+En el caso específico de las cadenas de texto (String), nunca se deben comparar utilizando ==. Debido a la inmutabilidad y al pool de strings, a veces == puede devolver true por casualidad, pero fallará en cuanto las cadenas se generen dinámicamente. La forma correcta y segura de comparar dos cadenas es siempre mediante el método equals(), el cual ha sido sobrescrito por los ingenieros de Java para comparar carácter por carácter el contenido de los textos.
 
 ## 21. ¿Qué son las clases "wrapper" en un lenguaje de programación orientado a objetos? ¿Cómo se hace? ¿Es un proceso automático? ¿Qué ventajas tienen? ¿Todos los lenguajes orientados a objetos tienen tipos primitivos y necesitan wrappers? 
 
