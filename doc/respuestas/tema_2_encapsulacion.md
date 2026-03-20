@@ -281,18 +281,98 @@ En el caso específico de las cadenas de texto (String), nunca se deben comparar
 ## 21. ¿Qué son las clases "wrapper" en un lenguaje de programación orientado a objetos? ¿Cómo se hace? ¿Es un proceso automático? ¿Qué ventajas tienen? ¿Todos los lenguajes orientados a objetos tienen tipos primitivos y necesitan wrappers? 
 
 ### Respuesta
+Se definen las clases wrapper (o envolventes) como clases diseñadas para encapsular un tipo de dato primitivo dentro de un objeto. En Java, cada tipo primitivo tiene su correspondiente clase espejo (por ejemplo, int tiene Integer, boolean tiene Boolean). Este mecanismo permite tratar a los valores básicos como si fueran instancias de una clase, lo cual es un requisito indispensable para utilizar ciertas funcionalidades del lenguaje que solo operan con objetos, como las colecciones (ArrayList, HashMap) o la programación genérica.
 
+El proceso de conversión entre el tipo primitivo y su objeto envolvente se denomina autoboxing (de primitivo a objeto) y unboxing (de objeto a primitivo). En las versiones modernas de Java, este proceso es automático y transparente para el programador. Se puede asignar un int a una variable de tipo Integer directamente, y la Máquina Virtual se encarga de realizar la instanciación necesaria "bajo el capó".
+
+Las ventajas principales incluyen la posibilidad de trabajar con valores nulos (null), lo cual no es posible con primitivos, y el acceso a una amplia gama de métodos de utilidad proporcionados por la clase (como Integer.parseInt() para convertir texto a número). Además, permiten que los tipos básicos participen en la jerarquía de herencia de la clase Object.
+
+Respecto a otros lenguajes, no todos presentan esta distinción. Lenguajes considerados "puros" en su orientación a objetos, como Smalltalk o Ruby, no poseen tipos primitivos; en ellos, absolutamente todo es un objeto desde el principio. Java y C++, por el contrario, mantienen los primitivos por razones de rendimiento y eficiencia de memoria, recurriendo a los wrappers solo cuando la flexibilidad del objeto es estrictamente necesaria.
 
 ## 22. ¿En POO qué es un **tipo de dato enumerado**? ¿En Java, un tipo de dato enumerado es una clase? ¿Qué ventajas tienen en términos de encapsulación los enumerados en Java?
 
 ### Respuesta
+Un tipo de dato enumerado (enum) es una estructura que define un conjunto fijo de constantes con nombre, representando un dominio cerrado de valores posibles. Se emplea para modelar datos que tienen un rango limitado y previsible, como los puntos cardinales, los estados de un pedido o los meses del año. Su uso principal es aportar seguridad de tipos (type safety), garantizando que una variable solo pueda tomar uno de los valores predefinidos y evitando errores por valores arbitrarios.
 
+En el contexto de Java, un enumerado es técnicamente una clase especial. A diferencia de C o C++ clásico, donde los enum son básicamente alias para números enteros, en Java heredan de la clase java.lang.Enum. Esto significa que pueden tener atributos, métodos y constructores propios. Cada instancia de un enumerado en Java es un objeto único y constante que se crea al cargar la clase.
+
+Desde la perspectiva de la encapsulación, los enumerados ofrecen ventajas robustas al permitir asociar comportamiento directamente con los datos. En lugar de tener la lógica de negocio dispersa en funciones externas que utilicen un switch o múltiples if, dicha lógica puede residir de forma privada dentro del propio enumerado. Esto centraliza la responsabilidad, oculta los detalles de implementación y asegura que las reglas asociadas a cada constante se apliquen de manera consistente y protegida en todo el sistema.
 
 ## 23. Crea un tipo enumerado en Java que se llame `Mes`, con doce posibles instancias y que además proporcione métodos para obtener cuántos días tiene ese mes, el ordinal de ese mes en el año (1-12), empleando atributos privados y constructores del tipo enumerado.
 
 ### Respuesta
+Para cumplir con los requisitos, se definen los atributos como private final para asegurar que la información no sea modificada externamente, manteniendo la inmutabilidad de las constantes del enumerado. El constructor de un enumerado es siempre privado por definición en Java, reforzando la seguridad de que no se crearán nuevas instancias fuera de las doce definidas.
 
+public enum Mes {
+    ENERO(31, 1), FEBRERO(28, 2), MARZO(31, 3), ABRIL(30, 4),
+    MAYO(31, 5), JUNIO(30, 6), JULIO(31, 7), AGOSTO(31, 8),
+    SEPTIEMBRE(30, 9), OCTUBRE(31, 10), NOVIEMBRE(30, 11), DICIEMBRE(31, 12);
+
+    private final int numDias;
+    private final int ordinal;
+
+    // El constructor siempre es privado en un enum
+    private Mes(int numDias, int ordinal) {
+        this.numDias = numDias;
+        this.ordinal = ordinal;
+    }
+
+    public int getNumDias() {
+        return this.numDias;
+    }
+
+    public int getOrdinal() {
+        return this.ordinal;
+    }
+}
+
+En este diseño, se observa cómo la información de cada mes queda encapsulada. El usuario del enumerado no necesita conocer cuántos días tiene un mes internamente ni cómo se almacena su orden; simplemente solicita la información a través de la interfaz pública proporcionada por los métodos getNumDias() y getOrdinal().
 
 ## 24. Añade a la clase `Mes` del ejercicio anterior cuatro métodos para devolver si ese mes tiene algunos días de invierno, primavera, verano u otoño, indicando con un booleano el hemisferio (norte o sur, parámetro `enHemisferioNorte`). Es decir: `esDePrimavera(boolean esHemisferioNorte)`, `esDeVerano(boolean esHemisferioNorte)`, `esDeOtoño(boolean esHemisferioNorte)`, `esDeInvierno(boolean esHemisferioNorte)`
 
 ### Respuesta
+A continuación se presenta la ampliación del enumerado Mes. Para simplificar la lógica, se han agrupado los meses por estaciones completas según la convención climática general (por ejemplo, en el hemisferio norte el invierno comprende diciembre, enero y febrero).
+
+public enum Mes {
+    ENERO(31, 1), FEBRERO(28, 2), MARZO(31, 3), ABRIL(30, 4),
+    MAYO(31, 5), JUNIO(30, 6), JULIO(31, 7), AGOSTO(31, 8),
+    SEPTIEMBRE(30, 9), OCTUBRE(31, 10), NOVIEMBRE(30, 11), DICIEMBRE(31, 12);
+
+    private final int numDias;
+    private final int ordinal;
+
+    private Mes(int numDias, int ordinal) {
+        this.numDias = numDias;
+        this.ordinal = ordinal;
+    }
+
+    public boolean esDeInvierno(boolean esHemisferioNorte) {
+        if (esHemisferioNorte) {
+            return this == DICIEMBRE || this == ENERO || this == FEBRERO;
+        }
+        return this == JUNIO || this == JULIO || this == AGOSTO;
+    }
+
+    public boolean esDePrimavera(boolean esHemisferioNorte) {
+        if (esHemisferioNorte) {
+            return this == MARZO || this == ABRIL || this == MAYO;
+        }
+        return this == SEPTIEMBRE || this == OCTUBRE || this == NOVIEMBRE;
+    }
+
+    public boolean esDeVerano(boolean esHemisferioNorte) {
+        if (esHemisferioNorte) {
+            return this == JUNIO || this == JULIO || this == AGOSTO;
+        }
+        return this == DICIEMBRE || this == ENERO || this == FEBRERO;
+    }
+
+    public boolean esDeOtoño(boolean esHemisferioNorte) {
+        if (esHemisferioNorte) {
+            return this == SEPTIEMBRE || this == OCTUBRE || this == NOVIEMBRE;
+        }
+        return this == MARZO || this == ABRIL || this == MAYO;
+    }
+}
+
+Este código ejemplifica cómo la encapsulación permite manejar lógica condicional compleja (dependencia del mes y del hemisferio) dentro del objeto. El programador que utilice la clase no tiene que recordar qué meses corresponden a cada estación en el hemisferio sur; simplemente delega esa pregunta al objeto Mes correspondiente, el cual responde basándose en su propio estado interno y el parámetro proporcionado.
