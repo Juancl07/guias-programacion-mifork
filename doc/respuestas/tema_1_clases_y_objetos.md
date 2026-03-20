@@ -18,49 +18,109 @@ Por favor, escribe en impersonal las respuestas.
 ## 1. ¿Cuáles son las cuatro características básicas de la programación orientada a objetos? Describe brevemente cada una
 
 ### Respuesta
-
+Para comprender este paradigma se deben identificar cuatro pilares: la abstracción, que simplifica la realidad extrayendo solo las propiedades esenciales, y el encapsulamiento, que agrupa datos y métodos restringiendo el acceso externo para proteger la integridad de la información.
+A estos se añaden la herencia, que permite crear nuevas clases a partir de otras para reutilizar código y establecer jerarquías, y el polimorfismo, que otorga a distintos objetos la capacidad de responder de manera diferente a un mismo mensaje o llamada a un método.
 
 ## 2. Cita cuatro lenguajes populares que permitan la programación orientada a objetos
 
 ### Respuesta
-
+Entre los lenguajes más destacados se encuentra Java, reconocido por su enfoque estrictamente orientado a objetos, y C++, que nació como una evolución de C para incorporar clases manteniendo el control de bajo nivel.
+También son fundamentales Python, muy valorado por su sintaxis legible y versatilidad multiparadigma, y C#, el estándar desarrollado por Microsoft para aplicaciones empresariales y el desarrollo de videojuegos profesionales.
 
 ## 3. Los paradigmas anteriores a la POO, ¿Qué es la **programación estructurada**? y, todavía mejor, ¿Qué es la **programación modular**?
 
 ### Respuesta
+La programación estructurada se basa en organizar el software mediante una secuencia lógica de instrucciones, apoyándose en estructuras de control como bucles y condicionales. Su propósito es mejorar la claridad del flujo del programa, aunque mantiene los datos y las funciones que los manipulan como entidades separadas.
+Por su parte, la programación modular avanza un paso más al dividir el código en bloques o módulos independientes. Cada módulo agrupa funciones relacionadas con una tarea específica, lo que facilita el mantenimiento del sistema y permite la reutilización de componentes en diferentes partes de una aplicación.
 
 ## 4. ¿Qué tres elementos definen a un objeto en programación orientada a objetos?
 
 ### Respuesta
+Un objeto se define fundamentalmente por su estado y su comportamiento. El estado está compuesto por los valores de sus atributos (equivalentes a los campos de una struct en C), mientras que el comportamiento se determina mediante los métodos o funciones que el objeto puede ejecutar.
+El tercer elemento esencial es la identidad, que es la propiedad que distingue a un objeto de cualquier otro dentro del sistema. Gracias a la identidad, el entorno de ejecución puede reconocer dos objetos como entidade
 
 ## 5. ¿Qué es una clase? ¿Es lo mismo que un objeto? ¿Qué es una instancia? ¿Todos los lenguajes orientados a objetos manejan el concepto de clase?
 
 ### Respuesta
+Una clase se describe como el molde o plano que especifica qué datos y funciones tendrá un tipo de objeto. No es lo mismo que un objeto; mientras la clase es la definición abstracta, el objeto es la entidad real que ocupa espacio en la memoria durante la ejecución del programa.
+El término instancia se utiliza para designar a un objeto concreto que ha sido creado a partir de una clase. Se dice que el objeto es una "instancia de la clase" porque representa un ejemplar específico de ese modelo general previamente definido.
+Aunque la mayoría de los lenguajes populares utilizan clases, no todos los lenguajes orientados a objetos se basan en ellas. Existen lenguajes basados en prototipos, como JavaScript, donde los objetos pueden crearse clonando otros objetos directamente sin necesidad de definir una clase formal.
 
 
 ## 6. ¿Dónde se almacenan en memoria los objetos? ¿Es igual en todos los lenguajes? ¿Qué es la **recolección de basura**? 
 
 ### Respuesta
+Los objetos se almacenan generalmente en una región de memoria llamada Heap (montón).
 
+Heap vs. Stack: Mientras que las variables locales y las llamadas a funciones viven en el Stack (pila), que es rápido pero pequeño, los objetos viven en el Heap, que es mucho más grande y flexible.
+
+¿Es igual en todos? No exactamente. En lenguajes como C++, tú decides si un objeto va al Stack o al Heap. En Java o C#, casi todos los objetos van directos al Heap.
+
+Recolección de basura (Garbage Collection): Es un proceso automático que busca objetos en el Heap que ya no están siendo utilizados (nadie los referencia) y libera esa memoria para que el programa no se quede sin espacio. ¡Es como tener un equipo de limpieza que pasa por tu código para que tú no tengas que borrar manualmente cada objeto!
 
 ## 7. ¿Qué es un método? ¿Qué es la **sobrecarga de métodos**? 
 
 ### Respuesta
+Respuesta
+Método: Es un bloque de código dentro de una clase que define un comportamiento o acción que el objeto puede realizar. Es el equivalente a una función, pero "vive" dentro de la clase.
 
+Sobrecarga de métodos: Es la capacidad de definir varios métodos con el mismo nombre dentro de la misma clase, siempre que su lista de parámetros sea distinta (diferente número de argumentos o diferentes tipos).
+
+Ejemplo rápido: Puedes tener un método dibujar(String color) y otro dibujar(int grosor). El compilador sabe cuál usar dependiendo de lo que le pases.
 
 ## 8. Ejemplo mínimo de clase en Java, que se llame Punto, con dos atributos, x e y, con un método que se llame `calculaDistanciaAOrigen`, que calcule la distancia a la posición 0,0. Por sencillez, los atributos deben tener visibilidad por defecto. Crea además un ejemplo de uso con una instancia y uso del método
 
 ### Respuesta
+class Punto {
+    int x; // Visibilidad por defecto
+    int y;
 
+    double calculaDistanciaAOrigen() {
+        return Math.sqrt(x * x + y * y);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        // Crear una instancia (objeto)
+        Punto miPunto = new Punto();
+        miPunto.x = 3;
+        miPunto.y = 4;
+
+        // Uso del método
+        double distancia = miPunto.calculaDistanciaAOrigen();
+        System.out.println("La distancia al origen es: " + distancia);
+    }
+}
 
 ## 9. ¿Cuál es el punto de entrada en un programa en Java? ¿Qué es `static` y para qué vale? ¿Sólo se emplea para ese método `main`? ¿Para qué se combina con `final`?
 
 ### Respuesta
+Respuesta
+Punto de entrada: Es el método public static void main(String[] args). Sin esto, la JVM no sabe por dónde empezar a ejecutar tu programa.
+
+¿Qué es static? Significa que el método o atributo pertenece a la clase en sí, y no a una instancia (objeto) específica. Puedes usarlo sin crear un objeto con new.
+
+¿Solo para main? ¡No! Se usa para métodos de utilidad (como Math.sqrt()) o para contar cuántos objetos se han creado de una clase.
+
+Combinación con final: Se usa para crear constantes. Por ejemplo: static final double PI = 3.14159;. Al ser static, solo existe una copia; al ser final, su valor no puede cambiar.
 
 ## 10. Intenta ejecutar un poco de Java de forma básica, con los comandos `javac` y `java`. ¿Cómo podemos compilar el programa y ejecutarlo desde linea de comandos? ¿Java es compilado? ¿Qué es la **máquina virtual**? ¿Qué es el *byte-code* y los ficheros `.class`?
 
 ### Respuesta
+Para trabajar con Java desde la terminal, el flujo es:
 
+Compilar: Usas el comando javac Punto.java. Esto genera un archivo llamado Punto.class.
+
+Ejecutar: Usas el comando java Punto (sin la extensión).
+
+Conceptos clave:
+
+¿Es compilado? Sí, pero no a código máquina directamente. Es un lenguaje híbrido.
+
+Byte-code: Es el código intermedio (el contenido de los archivos .class) que genera el compilador. No lo entiende tu procesador, pero sí la JVM.
+
+Máquina Virtual (JVM): Es el software que interpreta o compila el byte-code en tiempo real para que tu ordenador lo entienda. Esto es lo que permite que Java sea "escríbelo una vez, ejecútalo en cualquier parte".
 
 ## 11. En el código anterior de la clase `Punto` ¿Qué es `new`? ¿Qué es un **constructor**? Pon un ejemplo de constructor en una clase `Empleado` que tenga DNI, nombre y apellidos
 
