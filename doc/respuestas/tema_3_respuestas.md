@@ -244,9 +244,46 @@ En los lenguajes donde solo existe una opción, la más habitual es, por tanto, 
 ## 16. ¿Tiene sentido lanzar excepciones dentro del `catch`? ¿Se puede relanzar la misma excepción capturada? ¿Cuándo tendría sentido hacer esto último? Pon ejemplos de ambos casos.
 
 ### Respuesta
+Lanzar una excepción desde dentro de un bloque catch es una práctica común y con pleno sentido arquitectónico. Se realiza principalmente cuando el bloque de control actual no posee la capacidad o la responsabilidad de solucionar el error por completo, o cuando se desea transformar un error técnico de bajo nivel en uno más significativo para la lógica del negocio. Al lanzar una nueva excepción desde el catch, la ejecución del bloque se interrumpe y la nueva excepción comienza su propia propagación por la pila de llamadas.
 
+Es perfectamente posible relanzar la misma instancia de la excepción que ha sido capturada. Esto se logra simplemente escribiendo throw e; dentro del bloque catch. El objetivo de esta maniobra es permitir que una función realice una acción intermedia necesaria (como registrar el error en un archivo de log, liberar un recurso parcial o incrementar un contador de fallos) sin detener la propagación del error original, permitiendo que un nivel superior de la aplicación tome la decisión final sobre cómo informar al usuario o si se debe abortar el proceso.
+
+A continuación se presentan ejemplos de ambos escenarios:
+
+// Caso 1: Lanzar una nueva excepción (Traducción de error)
+try {
+    accesoADatos();
+} catch (SQLException e) {
+    // Se lanza una excepción distinta, más acorde al dominio del problema
+    throw new ServicioNoDisponibleException("El sistema de datos no responde");
+}
+
+// Caso 2: Relanzar la misma excepción (Acción intermedia)
+try {
+    realizarOperacionCritica();
+} catch (IOException e) {
+    log.error("Fallo detectado: " + e.getMessage()); // Acción intermedia
+    throw e; // Se relanza la misma para que el main la controle
+}
 
 ## 17. ¿En qué consiste que una excepción sea la **"causa"** de otra excepción? Pon un ejemplo en Java, donde capturemos una excepción de bajo nivel y la encapsulemos en otra personalizada de alto nivel. Cuando una excepción sale por pantalla y tiene una causa, ¿se ve?
 
 ### Respuesta
+El concepto de "causa" en las excepciones de Java, también conocido como encadenamiento de excepciones (exception chaining), consiste en asociar una excepción de bajo nivel con una de alto nivel. Esto permite que una capa de la aplicación informe de un error abstracto (como un fallo en el inicio de sesión) manteniendo internamente la referencia al error técnico real que lo provocó (como una desconexión de la base de datos). De este modo, se respeta la encapsulación de las capas superiores sin perder la información necesaria para el diagnóstico técnico.
+
+Para implementar esto, la mayoría de las clases de excepción en Java poseen constructores que aceptan un parámetro de tipo Throwable. Al pasar la excepción original al constructor de la nueva, se establece un vínculo permanente entre ambas. Es una técnica esencial en el desarrollo de librerías y grandes sistemas, donde se busca ocultar detalles de implementación complejos tras interfaces de error más sencillas y manejables para el programador que utiliza el componente.
+
+En el siguiente ejemplo se muestra cómo encapsular una excepción técnica en una de negocio:
+
+public void registrarUsuario(Usuario u) throws RegistroException {
+    try {
+        conexionDB.insertar(u);
+    } catch (SQLException e) {
+        // 'e' se pasa como causa de la nueva 'RegistroException'
+        throw new RegistroException("No se pudo completar el registro", e);
+    }
+}
+
+Cuando una excepción que tiene una causa se imprime por pantalla (por ejemplo, mediante e.printStackTrace()), Java muestra la traza completa de la excepción principal y, justo debajo, añade una sección que comienza con el texto "Caused by:". En esta sección aparece el nombre, el mensaje y la línea de código donde se originó la excepción interna. Esta visibilidad es fundamental para el proceso de depuración, ya que permite al desarrollador rastrear el error a través de todas las capas de abstracción hasta llegar a la raíz del problema.
+
 
