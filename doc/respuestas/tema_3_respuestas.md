@@ -96,26 +96,65 @@ Además, este sistema garantiza que los errores no puedan ser ignorados por acci
 ## 6. En orientación a objetos, ¿las excepciones suelen ser objetos? ¿Qué ventajas tiene esto en términos de encapsulación? ¿Podemos entonces crear excepciones personalizadas?
 
 ### Respuesta
+En los lenguajes de programación orientada a objetos modernos, las excepciones son efectivamente objetos. A diferencia de los códigos de error numéricos de C, una excepción es una instancia de una clase específica que hereda de una jerarquía común (en Java, la clase base es Throwable). Esto permite que el error no sea solo una señal de "algo falló", sino una entidad con estado y comportamiento propio.
 
+Desde la perspectiva de la encapsulación, tratar las excepciones como objetos permite agrupar toda la información relevante del error en un solo paquete. Un objeto excepción puede contener campos privados para códigos de error específicos, marcas de tiempo, identificadores de usuario o el estado del sistema en el momento del fallo. Al exponer estos datos a través de métodos públicos, se mantiene la integridad de la información del error mientras se ofrece una interfaz clara para que el manejador tome decisiones informadas.
+
+La naturaleza de objeto de las excepciones permite, por tanto, la creación de excepciones personalizadas. Simplemente se debe definir una nueva clase que extienda de Exception o RuntimeException. Esto es fundamental en el diseño de software profesional, ya que permite al programador definir errores semánticos específicos de su dominio (como SaldoInsuficienteException o UsuarioNoEncontradoException), facilitando un control de errores mucho más preciso y descriptivo que el uso de excepciones genéricas.
 
 ## 7. En relación con las ventajas de la encapsulación, comparando el ejemplo en C con Java. ¿Qué **información esencial** lleva cualquier **objeto excepción** que es muy útil tener cuando se llega a un manejador?
 
 ### Respuesta
+Mientras que en C un error suele reducirse a un entero devuelto por una función o guardado en la variable global errno, un objeto excepción en Java transporta una carga informativa mucho más rica. La información más crítica es el mensaje de error descriptivo y, sobre todo, la traza de la pila (stack trace). La traza de la pila es una lista detallada de todos los métodos que estaban activos en el momento del lanzamiento, indicando el archivo y la línea exacta donde se originó el problema.
 
+Otra pieza de información esencial es la causa original (conocida como exception chaining). En sistemas complejos, una excepción de bajo nivel (como un error de red) puede ser capturada y envuelta en una de alto nivel (como un error de servicio). El objeto excepción permite almacenar la referencia a la excepción original, permitiendo que el desarrollador rastree el fallo a través de diferentes capas de abstracción sin perder el contexto inicial.
+
+Esta riqueza informativa permite que los manejadores de excepciones no solo sepan que ocurrió un error, sino que posean un "mapa" completo de la ejecución del programa hasta ese punto. En C, una vez que un error se propaga fuera de la función, se pierde el contexto de qué línea exacta lo causó; en Java, esa información viaja encapsulada dentro del objeto hasta que alguien decide procesarla o imprimirla.
 
 ## 8. En Java, sobre el bloque **"try-catch"**, ¿se pueden tener más de un bloque `catch`? ¿cuántos bloques `catch` se ejecutan?
 
 ### Respuesta
+Se permite, y a menudo es recomendable, definir múltiples bloques catch para un único bloque try. Esto se hace para capturar diferentes tipos de excepciones que podrían surgir de una misma secuencia de instrucciones. Por ejemplo, al leer un fichero, se podría querer capturar una FileNotFoundException de forma distinta a una IOException general o a una SecurityException.
 
+En cuanto a la ejecución, solo se ejecuta un bloque catch por cada excepción lanzada: el primero cuya clase coincida o sea una superclase de la excepción lanzada. El orden de los bloques es, por tanto, crucial. Se debe colocar siempre las excepciones más específicas arriba y las más genéricas abajo. Si se colocara catch (Exception e) al principio, este capturaría absolutamente todo, dejando los bloques inferiores como código inalcanzable, lo cual generaría un error de compilación.
+
+Una vez que un bloque catch termina de ejecutarse, el control del programa salta directamente al final de toda la estructura try-catch (o al bloque finally, si existe). No se "siguen probando" los demás bloques catch una vez que uno ha sido seleccionado, garantizando que el manejo del error sea único y predecible.
 
 ## 9. Si las excepciones producen rupturas en el código llamador, ¿cómo podemos garantizar que se ejecuta siempre finalmente un código necesario para cierre de ficheros, liberacion de recursos, antes de que continúe propagándose la excepción? Pon un ejemplo en Java con `finally`, tanto con `catch` como sin él.
 
 ### Respuesta
+Para garantizar la liberación de recursos críticos en presencia de errores, Java proporciona el bloque finally. Este bloque se sitúa después de los bloques catch y contiene código que se ejecutará sin importar si el bloque try terminó con éxito o si se lanzó una excepción que fue (o no) capturada. Es la herramienta estándar para cerrar descriptores de ficheros, conexiones de red o liberar bloqueos de memoria.
 
+El uso de finally con catch es el escenario más común, donde se intenta una operación, se manejan los errores conocidos y se asegura la limpieza final. Por otro lado, el uso de try-finally (sin catch) es sumamente útil cuando una función no sabe cómo manejar el error y prefiere que este se propague, pero aun así tiene la responsabilidad de cerrar sus propios recursos antes de "morir".
+
+// Ejemplo con try-catch-finally
+try {
+    abrirFichero();
+    leerDatos();
+} catch (IOException e) {
+    System.out.println("Error al leer");
+} finally {
+    // Se ejecuta ocurra o no el error
+    cerrarFichero();
+}
+
+// Ejemplo con try-finally (la excepción se propaga hacia arriba)
+try {
+    conectarseABaseDeDatos();
+    ejecutarConsulta();
+} finally {
+    // Se garantiza el cierre incluso si la consulta falla y la excepción viaja al main
+    cerrarConexion();
+}
 
 ## 10. En Java, el bloque `finally` puede ir sin `catch`? ¿Se ejecuta siempre tanto si ocurre como si no ocurre una excepción? ¿Y si hay un `return` en medio del `try`?
 
 ### Respuesta
+Es perfectamente válido que un bloque finally aparezca sin necesidad de un bloque catch. Esta estructura se emplea cuando el objetivo primordial no es gestionar el error en ese punto, sino asegurar la integridad del estado del programa o la liberación de recursos antes de que la excepción continúe su camino por la pila de llamadas. El único requisito es que un bloque try vaya seguido de al menos un catch o de un finally.
+
+Se garantiza que el código dentro de finally se ejecuta siempre, independientemente de si se lanzó una excepción o no. Incluso en situaciones de éxito donde el código del try se completa normalmente, el flujo pasará por el finally antes de continuar con la siguiente instrucción fuera del bloque. Solo existen casos extremos donde no se ejecutaría, como un fallo catastrófico de la Máquina Virtual, un corte de energía o la llamada explícita a System.exit().
+
+Un detalle técnico fundamental es el comportamiento ante la sentencia return. Si existe un return dentro del bloque try, la Máquina Virtual no sale de la función inmediatamente; primero ejecuta todo el contenido del bloque finally y, solo entonces, se hace efectivo el retorno del valor. Este comportamiento asegura que nunca se deje un recurso abierto por el hecho de querer finalizar una función prematuramente tras un éxito.
 
 
 ## 11. En Java, qué son las excepciones **"controladas"** y las **"no controladas"**? ¿Qué papel juega `RuntimeException`? Pon un ejemplo de excepciones típicas controladas y no controladas que incluso nosotros mismos podríamos usar. Haz dos listas con 3 o 4 ejemplos de situación donde se suele preferir una excepción controlada y donde se suele preferir una excepción no controlada.
