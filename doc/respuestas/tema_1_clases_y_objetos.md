@@ -209,7 +209,47 @@ public String toString() {
 
 ### Respuesta
 
+En esencia, sí: una clase es la evolución natural de un struct. Si lo piensas, ambos son contenedores que agrupan datos relacionados. Sin embargo, para que un struct de C se convierta en una clase de Java, le faltan tres pilares fundamentales:
+
+Comportamiento (Métodos): Un struct solo guarda datos (estado). Una clase guarda datos y las funciones que operan sobre esos datos (métodos).
+
+Encapsulamiento (Visibilidad): En un struct, todo es público por defecto. No existen private o protected para proteger los datos de usos indebidos.
+
+Mecanismos de Herencia y Polimorfismo: Un struct no puede "heredar" de otro de forma nativa, ni puedes redefinir comportamientos de la misma manera que lo haces en la Programación Orientada a Objetos (POO).
+
+En resumen: Un struct es una caja de herramientas pasiva. Una clase es un objeto inteligente que sabe qué datos tiene y qué puede hacer con ellos.
+
 
 ## 17. Quitemos un poco de magia a todo esto: ¿Como se podría “emular”, con `struct` en C, la clase `Punto`, con su función para calcular la distancia al origen? ¿Qué ha pasado con `this`?
 
 ### Respuesta
+
+Para "emular" una clase en C, tenemos que separar los datos de la lógica, pero forzarlos a trabajar juntos. El truco está en pasar el struct como argumento a la función.
+
+Ejemplo en C:
+#include <stdio.h>
+#include <math.h>
+
+// Los datos (atributos)
+struct Punto {
+    int x;
+    int y;
+};
+
+// El "método" (necesita recibir el struct explícitamente)
+double calculaDistanciaAOrigen(struct Punto *self) {
+    return sqrt(self->x * self->x + self->y * self->y);
+}
+
+int main() {
+    struct Punto miPunto = {3, 4};
+    // Llamamos a la función pasando la dirección del struct
+    double d = calculaDistanciaAOrigen(&miPunto);
+    printf("Distancia: %f", d);
+    return 0;
+}
+
+¿Qué ha pasado con this?
+En Java, this es implícito: el lenguaje lo pasa por ti "por detrás" cada vez que llamas a un método. En C, ese this tiene que ser explícito. En el ejemplo de arriba, el parámetro struct Punto *self es exactamente lo mismo que el this de Java.
+
+Cuando en Java haces miPunto.calculaDistancia(), la Máquina Virtual realmente está haciendo algo muy parecido a calculaDistancia(miPunto). ¡La magia de la POO es simplemente que el lenguaje te ahorra escribir ese parámetro!
