@@ -126,25 +126,82 @@ Máquina Virtual (JVM): Es el software que interpreta o compila el byte-code en 
 
 ### Respuesta
 
+new: Es el operador encargado de instanciar un objeto. Su función es pedirle a la Máquina Virtual (JVM) que reserve un espacio de memoria en el Heap para el nuevo objeto y devuelva la dirección de memoria (referencia) donde se encuentra.
+
+Constructor: Es un método especial que se ejecuta automáticamente al usar new. Su objetivo es inicializar el estado del objeto (darle valores iniciales a sus atributos). Se reconoce porque tiene el mismo nombre que la clase y no tiene tipo de retorno.
+
+Ejemplo de la clase Empleado:
+public class Empleado {
+    String dni;
+    String nombre;
+    String apellidos;
+
+    // Este es el constructor
+    public Empleado(String dni, String nombre, String apellidos) {
+        this.dni = dni;
+        this.nombre = nombre;
+        this.apellidos = apellidos;
+    }
+}
 
 ## 12. ¿Qué es la referencia `this`? ¿Se llama igual en todos los lenguajes? Pon un ejemplo del uso de `this` en la clase `Punto`
 
 ### Respuesta
+
+this es una palabra reservada que hace referencia a "este objeto" (la instancia actual en la que se está ejecutando el código). Se usa principalmente para evitar ambigüedades cuando el nombre de un parámetro es igual al de un atributo.
+
+En otros lenguajes: No siempre se llama igual. En Python se usa self, en PHP se usa $this, y en Visual Basic se usa Me.
+
+Ejemplo en Punto:
+public class Punto {
+    int x;
+    int y;
+
+    public void setPosicion(int x, int y) {
+        this.x = x; // 'this.x' es el atributo, 'x' es el parámetro
+        this.y = y;
+    }
+}
 
 
 ## 13. Añade ahora otro nuevo método que se llame `distanciaA`, que reciba un `Punto` como parámetro y calcule la distancia entre `this` y el punto proporcionado
 
 ### Respuesta
 
+Para calcular la distancia entre dos puntos $(x_1, y_1)$ y $(x_2, y_2)$, usamos la fórmula: sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}
+
+public double distanciaA(Punto otroPunto) {
+    int dx = this.x - otroPunto.x;
+    int dy = this.y - otroPunto.y;
+    return Math.sqrt(dx * dx + dy * dy);
+}
 
 ## 14. El paso del `Punto` como parámetro a un método, es **por copia** o **por referencia**, es decir, si se cambia el valor de algún atributo del punto pasado como parámetro, dichos cambios afectan al objeto fuera del método? ¿Qué ocurre si en vez de un `Punto`, se recibiese un entero (`int`) y dicho entero se modificase dentro de la función? 
 
 ### Respuesta
 
+Esta es la "pregunta trampa" clásica de Java. La respuesta técnica es que Java siempre pasa todo por valor, pero el comportamiento varía según el tipo:
+
+Objetos (como Punto): Lo que se pasa por valor es la referencia (la dirección de memoria). Por tanto, si modificas un atributo del objeto dentro del método (punto.x = 10), los cambios SÍ afectan al objeto original fuera del método, porque ambos apuntan al mismo sitio en el Heap.
+
+Primitivos (como int): Se pasa una copia literal del valor. Si cambias el int dentro del método, NO afecta a la variable original.
+
+Resumen: Los objetos se comportan como si fueran "por referencia" (puedes mutarlos), pero los primitivos son estrictamente "por copia".
+
 
 ## 15. ¿Qué es el método `toString()` en Java? ¿Existe en otros lenguajes? Pon un ejemplo de `toString()` en la clase `Punto` en Java
 
 ### Respuesta
+
+¿Qué es? Es un método heredado de la clase base Object. Su propósito es devolver una representación en texto (un String) del objeto. Si no lo sobrescribes, Java imprime algo feo como Punto@1a2b3c.
+
+¿Existe en otros? Sí, casi todos tienen un equivalente. En Python es __str__ o __repr__, en C# es ToString(), y en JavaScript es toString().
+
+Ejemplo en Punto:
+@Override
+public String toString() {
+    return "Punto(x=" + x + ", y=" + y + ")";
+}
 
 
 ## 16. Reflexiona: ¿una clase es como un `struct` en C? ¿Qué le falta al `struct` para ser como una clase y las variables de ese tipo ser instancias?
