@@ -87,27 +87,62 @@ public: Indica que el miembro es accesible desde cualquier otra clase. Se utiliz
 ## 6. En Java, ¿A quiénes se pueden aplicar los modificadores `public` o `private`?
 
 ### Respuesta
+Los modificadores de acceso se aplican fundamentalmente a dos niveles dentro de la estructura de un programa en Java: a los miembros de una clase (atributos y métodos) y a las clases en sí mismas. Cuando se aplican a los miembros, se determina si otros objetos o clases pueden interactuar con esos datos o comportamientos específicos, siendo esta la base del encapsulamiento.
 
+En el caso de las clases de nivel superior (aquellas definidas directamente en un archivo .java), solo se permite el uso del modificador public o la ausencia de modificador (visibilidad de paquete). No es posible declarar una clase de nivel superior como private, ya que esto impediría que cualquier otra parte del programa pudiera instanciarla, careciendo de utilidad práctica. Sin embargo, en las clases anidadas (clases dentro de otras clases), sí se permite el uso de private.
+
+Finalmente, los constructores también reciben estos modificadores. Un constructor public permite la creación de instancias desde cualquier punto del código, mientras que un constructor private restringe la creación de objetos a métodos internos de la propia clase. Esta última técnica es común en ciertos patrones de diseño donde se desea controlar estrictamente cuántas instancias de una clase existen en memoria.
 
 ## 7. En POO, la visibilidad puede ser pública o privada, pero ¿existen más tipos de visibilidad? ¿Qué ocurre en Java? ¿Y en otros lenguajes?
 
 ### Respuesta
+Además de los niveles extremos de visibilidad (público y privado), la mayoría de los lenguajes de programación orientada a objetos introducen niveles intermedios para facilitar la colaboración entre clases relacionadas o dentro de una jerarquía. El nivel más común es protected, el cual permite el acceso a los miembros no solo a la propia clase, sino también a todas aquellas que hereden de ella (subclases), incluso si se encuentran en diferentes paquetes o módulos.
 
+En Java, existe un cuarto nivel denominado "visibilidad de paquete" (o package-private), que se aplica por defecto cuando no se especifica ningún modificador. Este nivel permite que cualquier clase que resida en el mismo paquete acceda a los miembros, pero prohíbe el acceso desde fuera de él. Es un nivel intermedio de confianza que resulta muy útil para organizar módulos de software donde varias clases cooperan estrechamente entre sí.
+
+Otros lenguajes implementan esquemas similares pero con matices distintos. En C++, por ejemplo, se utilizan los mismos términos (public, protected, private), pero la visibilidad se define por bloques dentro de la clase. En lenguajes como Python, la visibilidad no es restrictiva por compilación; en su lugar, se sigue una convención donde el uso de uno o dos guiones bajos iniciales (_variable o __variable) indica al programador que ese miembro debe tratarse como privado o protegido, apelando a la responsabilidad del desarrollador.
 
 ## 8. Responde: Los miembros de instancia privados de un objeto están ocultos para (a) otras clases o (b) otras instancias, aunque sean de la misma clase. Pon un ejemplo añadiendo un método `calcularDistanciaAPunto(Punto otro)` y explica la respuesta.
 
 ### Respuesta
+La respuesta correcta es la (a): otras clases. En Java, la visibilidad private se define a nivel de clase y no a nivel de instancia. Esto significa que un objeto de la clase Punto puede acceder libremente a los atributos privados de otro objeto de la clase Punto, siempre que dicho acceso se produzca dentro del código de la propia clase.
 
+Este comportamiento es fundamental para implementar operaciones que involucran a dos objetos del mismo tipo, como comparaciones de igualdad o cálculos geométricos. Si la visibilidad fuera por instancia, el objeto tendría que recurrir a métodos públicos para conocer los datos del "otro" objeto, lo cual sería ineficiente y complicaría innecesariamente el diseño interno de la clase.
+
+A continuación se muestra el ejemplo solicitado:
+public class Punto {
+    private double x;
+    private double y;
+
+    public Punto(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public double calcularDistanciaAPunto(Punto otro) {
+        // Se accede directamente a 'otro.x' y 'otro.y' aunque sean private
+        double dx = this.x - otro.x;
+        double dy = this.y - otro.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+}
+Como se observa en el método calcularDistanciaAPunto, el código accede a otro.x y otro.y sin problemas. Dado que el método pertenece a la clase Punto, el compilador permite el acceso a cualquier miembro privado de cualquier objeto que sea de tipo Punto.
 
 ## 9. ¿Qué son los métodos "getter" y "setter" en los lenguajes orientados a objetos?
 
 ### Respuesta
+Los métodos getter y setter (también conocidos como accesores y mutadores) son métodos públicos diseñados para leer o modificar el valor de un atributo privado, respectivamente. Su uso es una pieza clave de la encapsulación, ya que permiten que la clase mantenga el control total sobre sus datos internos, en lugar de exponer sus variables directamente al exterior.
 
+El método getter tiene como única misión retornar el valor de un atributo. Esto permite que el atributo sea de "solo lectura" para el resto del programa si no se proporciona un setter equivalente. Por otro lado, el método setter recibe un parámetro y lo asigna al atributo interno. La gran ventaja del setter es que permite incluir lógica de validación; por ejemplo, se podría impedir que se asigne un valor negativo a un atributo que represente una edad o un precio.
+
+El empleo de estos métodos mejora la mantenibilidad del código. Si en el futuro se decidiera cambiar la forma en que se almacena un dato (por ejemplo, pasar de almacenar la "edad" a almacenar la "fecha de nacimiento"), se podría modificar el interior del getter para que calcule la edad al vuelo, sin que las clases que llaman al método noten cambio alguno en la interfaz.
 
 ## 10. Cuando nos referimos a que la ocultación de información mejora la "seguridad" del programa, ¿nos referimos a que no pueda ser "hackeado"?
 
 ### Respuesta
+En el contexto de la ingeniería de software y la POO, el término "seguridad" no se refiere habitualmente a la protección contra ciberataques externos o "hackeos" malintencionados. En su lugar, se hace referencia a la seguridad interna del código y a la robustez del sistema frente a errores humanos durante el desarrollo. Se busca evitar que un programador, por desconocimiento o descuido, altere el estado de un objeto de una manera que lo deje en un estado inconsistente o inválido.
 
+La ocultación de información garantiza la integridad de las invariantes de clase. Al prohibir el acceso directo a los datos, se asegura que ninguna parte externa del programa pueda corromper la lógica interna del objeto. Por tanto, la "seguridad" aquí descrita es sinónimo de estabilidad y fiabilidad técnica, permitiendo que grandes equipos de trabajo colaboren en un mismo proyecto sin miedo a que los cambios en una zona del código provoquen fallos catastróficos e impredecibles en otras.
 
 ## 11. ¿Qué diferencia hay entre **miembro de instancia** y **miembro de clase**? ¿Los miembros de clase también se pueden ocultar?
 
